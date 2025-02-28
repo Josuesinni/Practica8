@@ -1,6 +1,8 @@
 package mx.edu.itesca.practica8
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -16,13 +18,25 @@ class detalle_pelicula : AppCompatActivity() {
 
         val iv_pelicula_imagen: ImageView = findViewById(R.id.iv_pelicula_imagen)
         val tv_nombre_pelicula: TextView = findViewById(R.id.tv_nombre_pelicula)
-        val tv_pelicula_decc: TextView = findViewById(R.id.tv_pelicula_desc)
-
+        val tv_pelicula_desc: TextView = findViewById(R.id.tv_pelicula_desc)
+        val seatsAvailable: TextView = findViewById(R.id.seatLeft)
+        var seats=-1
         val bundle=intent.extras
         if (bundle!=null){
             iv_pelicula_imagen.setImageResource(bundle.getInt("header"))
             tv_nombre_pelicula.setText(bundle.getString("titulo"))
-            tv_pelicula_decc.setText(bundle.getInt("sinopsis"))
+            tv_pelicula_desc.setText(bundle.getString("sinopsis"))
+            seats=bundle.getInt("numberSeats")
+            seatsAvailable.setText(bundle.getInt("numberSeats").toString()+" seats available")
+        }
+
+        val button: Button = findViewById(R.id.buyTickets)
+        button.setOnClickListener {
+            var intent: Intent = Intent(this,SeatSelectection::class.java)
+            intent.putExtra("name",tv_nombre_pelicula.text.toString())
+            intent.putExtra("id",1)
+            intent.putExtra("seats",seats)
+            startActivity(intent)
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
