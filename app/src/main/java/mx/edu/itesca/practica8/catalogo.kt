@@ -1,8 +1,10 @@
 package mx.edu.itesca.practica8
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +12,7 @@ import android.widget.BaseAdapter
 import android.widget.GridView
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -26,8 +29,6 @@ override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
     setContentView(R.layout.activity_catalogo)
-
-
     cargarPeliculas()
 
     adapter=PeliculaAdapter(this,peliculas)
@@ -38,6 +39,11 @@ override fun onCreate(savedInstanceState: Bundle?) {
 
     gridPelicula.adapter=adapter
     gridSeries.adapter=seriesAdapter
+
+    val bundle=intent.extras
+    if(bundle!=null) {
+        peliculas[bundle.getInt("posMovie")].seats.add(Cliente("", "", bundle.getInt("seat")))
+    }
     ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
         val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
         v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -59,8 +65,21 @@ fun cargarPeliculas(){
     series.add(Pelicula("Bones",R.drawable.bones,R.drawable.bonesheader,"Dr. Temperance Brennan is a brilliant, but lonely, anthropologist whom is approached by an ambitious FBI agent, named Seely Booth, to help the bureau solve a series of unsolved crimes by identifying the long-dead bodies of missing persons by their bone structure. But both Agent Booth and Dr. Brennan and her team come up again a variety of interference from red tape, corruption, and local noncooperation.", arrayListOf<Cliente>()))
     series.add(Pelicula("Suits",R.drawable.suits,R.drawable.suitsheader,"While running from a drug deal gone bad, brilliant young college dropout Mike Ross slips into a job interview with one of New York City's best legal closers, Harvey Specter. Tired of cookie-cutter law-school grads, Harvey takes a gamble by hiring Mike on the spot after recognizing his raw talent and photographic memory. Mike and Harvey are a winning team. Although Mike is a genius, he still has a lot to learn about law; and while Harvey might seem like an emotionless, cold-blooded shark, Mike's sympathy and concern for their cases and clients will help remind Harvey why he went into law in the first place. Mike's other allies in the office include the firm's best paralegal Rachel and Harvey's no-nonsense assistant Donna. Proving to be an irrepressible duo and invaluable to the practice, Mike and Harvey must keep their secret from everyone including managing partner Jessica and Harvey's archnemesis Louis, who seems intent on making Mike's life as difficult as possible.", arrayListOf<Cliente>()))
     series.add(Pelicula("Friends",R.drawable.friends,R.drawable.friendsheader,"Rachel Green, Ross Geller, Monica Geller, Joey Tribbiani, Chandler Bing and Phoebe Buffay are six 20 something year-olds, living off of one another in the heart of New York City. Over the course of ten years, this average group of buddies goes through massive mayhem, family trouble, past and future romances, fights, laughs, tears and surprises as they learn what it really means to be a friend.", arrayListOf<Cliente>()))
-
 }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 200 && resultCode == Activity.RESULT_OK) {
+            if(data!=null){
+                val bundle=data.extras
+                if (bundle!=null){
+                    val asiento = bundle.getInt("seat")
+                    val posMovie = bundle.getInt("posMovie")
+                    peliculas[posMovie].seats.add(Cliente("", "", asiento))
+                    adapter?.notifyDataSetChanged()
+                }
+            }
+        }
+    }
 }
 
 class PeliculaAdapter: BaseAdapter {
@@ -93,14 +112,19 @@ class PeliculaAdapter: BaseAdapter {
         title.setText(pelicula.titulo)
 
         image.setOnClickListener(){
+            var seatsAvailable = 20 - pelicula.seats.size
+            Log.d("seats", "$seatsAvailable")
+
             val intento = Intent(context,detalle_pelicula::class.java)
+
             intento.putExtra("titulo",pelicula.titulo)
             intento.putExtra("imagen",pelicula.image)
             intento.putExtra("header",pelicula.header)
             intento.putExtra("sinopsis",pelicula.sinopsis)
-            intento.putExtra("seats",(pelicula.seats))
+            //intento.putExtra("seats",pelicula.seats) //ArayList<Cliente>()
             intento.putExtra("numberSeats",(20-pelicula.seats.size))
-            context!!.startActivity(intento)
+            intento.putExtra("id", position)
+            (context as AppCompatActivity).startActivityForResult(intento, 200)
         }
         return vista
     }
