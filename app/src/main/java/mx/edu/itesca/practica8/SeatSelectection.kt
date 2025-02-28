@@ -21,10 +21,12 @@ class SeatSelectection : AppCompatActivity() {
 
         var posMovie = -1
         var seats = 0
+        var tipo = -1
         val bundle = intent.extras
         if (bundle != null) {
             title.setText(bundle.getString("name"))
             posMovie = bundle.getInt("id")
+            tipo = bundle.getInt("tipo")
             seats = bundle.getInt("seats")
         }
         val row1: RadioGroup = findViewById(R.id.row1)
@@ -42,26 +44,19 @@ class SeatSelectection : AppCompatActivity() {
             var asientoSeleccionado = -1;
             if (fila1 > -1) {
                 asientoSeleccionado = fila1;
-            /*    Toast.makeText(this, "Asiento en la fila 1: " + fila1.toString(), Toast.LENGTH_LONG)
-                    .show()
-            */} else if (fila2 > -1) {
+            } else if (fila2 > -1) {
                 asientoSeleccionado = fila2;
-            /*    Toast.makeText(this, "Asiento en la fila 2: " + fila2.toString(), Toast.LENGTH_LONG)
-                    .show()
-            */} else if (fila3 > -1) {
+            } else if (fila3 > -1) {
                 asientoSeleccionado = fila3;
-            /*    Toast.makeText(this, "Asiento en la fila 3: " + fila3.toString(), Toast.LENGTH_LONG)
-                    .show()
-            */} else if (fila4 > -1) {
+            } else if (fila4 > -1) {
                 asientoSeleccionado = fila4;
-            /*    Toast.makeText(this, "Asiento en la fila 4: " + fila4.toString(), Toast.LENGTH_LONG)
-                    .show()
-            */}
+            }
             if (asientoSeleccionado != -1) {
                 val intento = Intent()
                 intento.putExtra("seat", asientoSeleccionado)
                 intento.putExtra("seats", (seats - 1))
                 intento.putExtra("id", posMovie)
+                intento.putExtra("tipo",tipo)
                 setResult(Activity.RESULT_OK, intento)
                 finish()
             }

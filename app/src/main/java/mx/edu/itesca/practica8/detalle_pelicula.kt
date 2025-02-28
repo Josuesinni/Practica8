@@ -24,8 +24,8 @@ class detalle_pelicula : AppCompatActivity() {
         val seatsAvailable: TextView = findViewById(R.id.seatLeft)
         val button: Button = findViewById(R.id.buyTickets)
         var seats = -1
-        var id = -1;
-
+        var id = -1
+        var tipo = -1
         val bundle = intent.extras
         if (bundle != null) {
             iv_pelicula_imagen.setImageResource(bundle.getInt("header"))
@@ -33,6 +33,7 @@ class detalle_pelicula : AppCompatActivity() {
             tv_pelicula_desc.setText(bundle.getString("sinopsis"))
             seats = bundle.getInt("numberSeats")
             id = bundle.getInt("id")
+            tipo = bundle.getInt("tipo")
             seatsAvailable.setText(seats.toString() + " seats available")
         }
         if (seats == 0) {
@@ -43,6 +44,7 @@ class detalle_pelicula : AppCompatActivity() {
                 var intent: Intent = Intent(this, SeatSelectection::class.java)
                 intent.putExtra("name", tv_nombre_pelicula.text.toString())
                 intent.putExtra("id", id)
+                intent.putExtra("tipo",tipo)
                 startActivityForResult(intent, 200)
             }
         }
@@ -66,11 +68,15 @@ class detalle_pelicula : AppCompatActivity() {
                     val asiento=bundle.getInt("seat")
                     val posMovie=bundle.getInt("id")
                     val seats=bundle.getInt("seats")
+                    val tipo=bundle.getInt("tipo")
+
                     seatsAvailable.text = seats.toString()+" seats available"
 
                     val intento = Intent()
                     intento.putExtra("seat", asiento)
                     intento.putExtra("posMovie", posMovie)
+                    intento.putExtra("tipo", tipo)
+
                     setResult(Activity.RESULT_OK, intento)
                     finish()
                 }

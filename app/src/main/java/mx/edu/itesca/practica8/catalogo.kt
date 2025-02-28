@@ -31,8 +31,8 @@ override fun onCreate(savedInstanceState: Bundle?) {
     setContentView(R.layout.activity_catalogo)
     cargarPeliculas()
 
-    adapter=PeliculaAdapter(this,peliculas)
-    seriesAdapter=PeliculaAdapter(this,series)
+    adapter=PeliculaAdapter(this,peliculas,0)
+    seriesAdapter=PeliculaAdapter(this,series,1)
 
     var gridPelicula: GridView =findViewById(R.id.movies_catalogo)
     var gridSeries: GridView =findViewById(R.id.series_catalogo)
@@ -40,10 +40,10 @@ override fun onCreate(savedInstanceState: Bundle?) {
     gridPelicula.adapter=adapter
     gridSeries.adapter=seriesAdapter
 
-    val bundle=intent.extras
+    /*val bundle=intent.extras
     if(bundle!=null) {
         peliculas[bundle.getInt("posMovie")].seats.add(Cliente("", "", bundle.getInt("seat")))
-    }
+    }*/
     ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
         val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
         v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -74,8 +74,15 @@ fun cargarPeliculas(){
                 if (bundle!=null){
                     val asiento = bundle.getInt("seat")
                     val posMovie = bundle.getInt("posMovie")
-                    peliculas[posMovie].seats.add(Cliente("", "", asiento))
-                    adapter?.notifyDataSetChanged()
+                    val tipo = bundle.getInt("tipo")
+                    if (tipo==0){
+                        peliculas[posMovie].seats.add(Cliente("", "", asiento))
+                        adapter?.notifyDataSetChanged()
+                    }else{
+                        series[posMovie].seats.add(Cliente("", "", asiento))
+                        seriesAdapter?.notifyDataSetChanged()
+                    }
+
                 }
             }
         }
@@ -85,9 +92,11 @@ fun cargarPeliculas(){
 class PeliculaAdapter: BaseAdapter {
     var peliculas=ArrayList<Pelicula>()
     var context: Context? = null
-    constructor(context: Context, peliculas: ArrayList<Pelicula>):super(){
+    var tipo: Int
+    constructor(context: Context, peliculas: ArrayList<Pelicula>, tipo:Int):super(){
         this.peliculas=peliculas
         this.context=context
+        this.tipo=tipo
     }
 
     override fun getCount(): Int {
@@ -112,11 +121,7 @@ class PeliculaAdapter: BaseAdapter {
         title.setText(pelicula.titulo)
 
         image.setOnClickListener(){
-            var seatsAvailable = 20 - pelicula.seats.size
-            Log.d("seats", "$seatsAvailable")
-
             val intento = Intent(context,detalle_pelicula::class.java)
-
             intento.putExtra("titulo",pelicula.titulo)
             intento.putExtra("imagen",pelicula.image)
             intento.putExtra("header",pelicula.header)
@@ -124,6 +129,7 @@ class PeliculaAdapter: BaseAdapter {
             //intento.putExtra("seats",pelicula.seats) //ArayList<Cliente>()
             intento.putExtra("numberSeats",(20-pelicula.seats.size))
             intento.putExtra("id", position)
+            intento.putExtra("tipo",tipo)
             (context as AppCompatActivity).startActivityForResult(intento, 200)
         }
         return vista
